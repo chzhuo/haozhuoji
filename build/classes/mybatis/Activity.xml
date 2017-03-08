@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Activity">
+    <!-- 分页返回集合 -->
+	<select id="getActivityAble" resultType="Activity" parameterType="Activity">
+		<![CDATA[
+			SELECT *,fullTypeName(typeID) AS 'fullTypeName'
+			FROM activity
+			WHERE beginDateTime < NOW() AND endDateTime > NOW() AND
+			(
+				SELECT CASE WHEN SUM(returnPrice(goods.`product_price`,bundling.`price`)) IS NULL THEN 0 ELSE SUM(returnPrice(goods.`product_price`,bundling.`price`)) END FROM cart
+				LEFT JOIN bundling
+				ON bundling.`bundlingID` = cart.`bundlingID`
+				LEFT JOIN goods
+				ON cart.`goodsID` = goods.`goodsID`
+				WHERE userID = #{userID} AND (IF(goods.`goodsID` IS NOT NULL,CONCAT(fullTypeID(goods.typeID),'-') LIKE CONCAT(fullTypeID(activity.`typeID`),'-%'),FALSE) OR IF(activity.`typeID`=0,TRUE,FALSE))
+			)>rech
+		]]>
+	</select>
+	<select id="getList" parameterType="Activity" resultType="Activity">
+		select *,fullTypeName(activity.typeID) as 'fullTypeName' from activity
+		left join goodsType
+		on activity.typeID = goodsType.typeID
+	</select>
+	<insert id="add" parameterType="Activity">
+		insert into activity(typeID,rech,sub,beginDateTime,endDateTime)
+		values(#{typeID},#{rech},#{sub},#{beginDateTime},#{endDateTime})
+	</insert>
+	<update id="update" parameterType="Activity">
+		update activity
+		<set>
+			<if test="typeID!=null">typeID=#{typeID},</if>
+			<if test="rech!=null">rech=#{rech},</if>
+			<if test="sub!=null">sub=#{sub},</if>
+			<if test="beginDateTime!=null">beginDateTime=#{beginDateTime},</if>
+			<if test="endDateTime!=null">endDateTime=#{endDateTime},</if>
+		</set>
+		where activityID = #{activityID}
+	</update>
+	<select id="checkTypeID" resultType="int" parameterType="Activity">
+		select count(activityID) from activity
+		where (fullTypeID(#{typeID}) like concat(fullTypeID(typeID),'%') OR fullTypeID(typeID) like concat(fullTypeID(#{typeID}),'%'))
+		<if test="activityID!=null">
+			AND activityID!=#{activityID}
+		</if>
+	</select>
+	<delete id="delete" parameterType="Activity">
+		delete from activity
+		where activityID = #{activityID}
+	</delete>
+</mapper>

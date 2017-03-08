@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PointToCoupon">
+    <!-- 分页返回集合 -->
+	<select id="admin_getAllPointToCoupon" resultType="PointToCoupon" parameterType="PointToCoupon">
+		<![CDATA[
+		SELECT *,fullTypeName(goodsType.typeID) as 'fullTypeName' FROM pointToCoupon
+		left join goodstype
+		on pointToCoupon.typeID = goodstype.typeID
+		]]>
+	</select>
+	<select id="user_getAllPointToCoupon" resultType="PointToCoupon" parameterType="PointToCoupon">
+		<![CDATA[
+		SELECT *,fullTypeName(goodsType.typeID) as 'fullTypeName' FROM pointToCoupon
+		left join goodstype
+		on pointToCoupon.typeID = goodstype.typeID
+		where endDateTime>now()
+		]]>
+	</select>
+	<select id="getObject" parameterType="PointToCoupon" resultType="PointToCoupon">
+		SELECT *,fullTypeName(goodsType.typeID) as 'fullTypeName' FROM pointToCoupon
+		left join goodstype
+		on pointToCoupon.typeID = goodstype.typeID
+		where pointToCoupon.pointToCouponID = #{pointToCouponID}
+	</select>
+	<update id="update" parameterType="PointToCoupon">
+		update pointToCoupon
+		<set>
+			updateTimeStamp = #{updateTimeStamp},
+			<if test="points!=null">points=#{points} ,</if>
+			<if test="beginDateTime!=null">beginDateTime=#{beginDateTime} ,</if>
+			<if test="endDateTime!=null">endDateTime=#{endDateTime} ,</if>
+			<if test="typeID!=null">typeID=#{typeID} ,</if>
+			<if test="rech!=null">rech=#{rech} ,</if>
+			<if test="sub!=null">sub=#{sub} ,</if>
+		</set>
+		where pointToCouponID = #{pointToCouponID}
+	</update>
+	<delete id="delete" parameterType="PointToCoupon">
+		delete from pointToCoupon
+		where pointToCouponID = #{pointToCouponID}
+	</delete>
+	<insert id="add" parameterType="PointToCoupon">
+		insert into pointToCoupon(points,rech,sub,beginDateTime,endDateTime,typeID,updateTimeStamp)
+		values(#{points},#{rech},#{sub},#{beginDateTime},#{endDateTime},#{typeID},#{updateTimeStamp})
+	</insert>
+</mapper>

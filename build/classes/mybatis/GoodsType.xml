@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="GoodsType">
+	<select id="getList" resultType="GoodsType" parameterType="GoodsType">
+		SELECT *,fulltypeID(typeID) AS 'fullTypeID',fullTypeName(typeID) AS 'fullTypeName' FROM goodsType
+		<where>
+			<if test="typeID!=null">AND typeID = #{typeID}</if>
+			<if test="fatherID!=null">AND fatherID = #{fatherID}</if>
+		</where>
+		order by fulltypeID(typeID);
+	</select>
+	<update id="update" parameterType="GoodsType">
+		update goodsType set  typeName = #{typeName} where typeID =#{typeID}
+	</update>
+	<insert id="add" parameterType="GoodsType" keyProperty="typeID">
+		insert into goodsType(typeName,fatherID)
+		values(#{typeName},#{fatherID})
+	</insert>
+	<delete id="delete" parameterType="GoodsType">
+		delete from goodsType
+		where typeID = #{typeID}
+	</delete>
+	<select id="getTypeByGoods" parameterType="hashMap" resultType="GoodsType">
+		SELECT goods.typeID,goodsType.typeName,fullTypeID(goods.typeID) as 'fullTypeID' FROM goods
+		left join goodsType
+		on goods.typeID = goodsType.typeID
+		<where>
+			<if test="Goods.goodsID!=null">AND goodsID like "%${Goods.goodsID}%"</if>
+			<if test="Goods.productNumber!=null">AND productNumber like "%${Goods.productNumber}%"</if>
+			<if test="Goods.keyWord!=null"><![CDATA[ AND matchIndex(#{Goods.keyWord},goodsName,brand,keyword,promotion_sentence,properties,descriptionPage)>0]]></if>
+			<if test="Goods.sell!=null">AND sell=#{Goods.sell}</if>
+		</where>
+		group by typeID
+		order by typeID
+	</select>
+	<resultMap type="GoodsType" id="FSType">
+		<result column="typeID" property="typeID"/>
+		<result column="typeName" property="typeName"/>
+		<collection property="subTypeList" ofType="GoodsType" column="typeID">
+			<result column="sTypeID" property="typeID"/>
+			<result column="sTypeName" property="typeName"/>
+		</collection>
+	</resultMap>
+	<!-- 全部类，按类返回 -->
+	<select id="getAllTypeBySub" resultMap="FSType">
+		SELECT ft.typeID,ft.typeName,st.`typeID` AS 'sTypeID',st.`typeName` AS 'sTypeName' FROM goodsType ft
+		LEFT JOIN goodsType st
+		ON ft.`typeID` = st.`fatherID`
+		WHERE ft.`fatherID` = 0
+	</select>
+</mapper>

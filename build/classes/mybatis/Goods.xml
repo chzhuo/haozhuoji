@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Goods">
+    <!-- 分页返回搜索集合 -->
+	<select id="getSearchList" resultType="Goods" parameterType="hashMap">
+		SELECT goodsID,goodsName,product_price,reference_price,amount,brand,promotion_sentence,specification
+		FROM goods
+		<where>
+			<if test="Goods.keyWord!=null"><![CDATA[ AND matchIndex(#{Goods.keyWord},goodsName,brand,keyword,promotion_sentence,properties,descriptionPage)>0]]></if>
+			<if test="Goods.typeID!=null"> AND typeID like "${Goods.typeID}%"</if>
+			<if test="Goods.sell!=null">AND sell=#{Goods.sell}</if>
+		</where>
+		<if test="Page.orderBy!=null">
+			Order By #{Page.orderBy}
+		</if>
+		<if test="Page.orderBy==null">
+			<if test="Goods.keyWord!=null">
+				<![CDATA[ ORDER BY matchIndex(#{Goods.keyWord},goodsName,brand,keyword,promotion_sentence,properties,descriptionPage) DESC]]>
+			</if>
+		</if>
+		limit #{Page.startOption},#{Page.optionOfPage}
+	</select>
+	
+	<!-- 返回搜索分页总数 -->
+	<select id="getSearchPage" resultType="int" parameterType="hashMap">
+		SELECT count(goodsID)
+		FROM goods
+		<where>
+			<if test="Goods.goodsID!=null">AND goodsID like "%${Goods.goodsID}%"</if>
+			<if test="Goods.productNumber!=null">AND productNumber like "%${Goods.productNumber}%"</if>
+			<if test="Goods.keyWord!=null"><![CDATA[ AND matchIndex(#{Goods.keyWord},goodsName,brand,keyword,promotion_sentence,properties,descriptionPage)>0]]></if>
+			<if test="Goods.typeID!=null"> AND  fullTypeID(goods.typeID) LIKE CONCAT(fullTypeID(#{Goods.typeID}),'%')</if>
+			<if test="Goods.sell!=null">AND sell=#{Goods.sell}</if>
+		</where>
+	</select>
+	<!-- admin返回 -->
+	<select id="getSearchListAdmin" resultType="Goods" parameterType="hashMap">
+		SELECT goodsID,goodsName,product_price,reference_price,cost_price,collection_count,purchase_count,comment_count,browse_count,amount,brand,
+		promotion_sentence,specification,productNumber,createDateTime,updateTimeStamp,shelfNumber,points,typeName,sell
+		FROM goods
+		left join goodsType on goods.typeID = goodsType.typeID
+		<where>
+			<if test="Goods.goodsID!=null">AND goodsID like "%${Goods.goodsID}%"</if>
+			<if test="Goods.productNumber!=null">AND productNumber like "%${Goods.productNumber}%"</if>
+			<if test="Goods.keyWord!=null"><![CDATA[ AND matchIndex(#{Goods.keyWord},goodsName,brand,keyword,promotion_sentence,properties,descriptionPage)>0]]></if>
+			<if test="Goods.typeID!=null"> AND  fullTypeID(goods.typeID) LIKE CONCAT(fullTypeID(#{Goods.typeID}),'%')</if>
+			<if test="Goods.sell!=null">AND sell=#{Goods.sell}</if>
+		</where>
+		<if test="Page.orderBy!=null">
+			<if test="Page.orderBy.equals('product_price')">
+				ORDER BY product_price
+			</if>
+			<if test="Page.orderBy.equals('goodsID')">
+				ORDER BY goodsID
+			</if>
+			<if test="Page.orderBy.equals('productNumber')">
+				ORDER BY productNumber
+			</if>
+			<if test="Page.orderBy.equals('purchase_count')">
+				ORDER BY purchase_count
+			</if>
+			<if test="Page.orderBy.equals('comment_count')">
+				ORDER BY comment_count
+			</if>
+			<if test="Page.orderBy.equals('browse_count')">
+				ORDER BY browse_count
+			</if>
+			<if test="Page.orderBy.equals('collection_count')">
+				ORDER BY collection_count
+			</if>
+			<if test="Page.orderBy.equals('createDateTime')">
+				ORDER BY createDateTime
+			</if>
+			<if test="Page.orderBy.equals('updateDateTime')">
+				ORDER BY updateDateTime
+			</if>
+			<if test="Page.orderBy.equals('amount')">
+				ORDER BY amount
+			</if>
+			<if test="Page.orderBy.equals('typeID')">
+				ORDER BY goods.typeID
+			</if>
+			<if test="Page.orderBy.equals('brand')">
+				ORDER BY brand
+			</if>
+			<if test="Page.orderBy.equals('points')">
+				ORDER BY points
+			</if>
+			<if test="Page.orderBy.equals('aveComment')">
+				ORDER BY (SELECT AVG(POINT) FROM COMMENT WHERE comment.`goodsID` = goods.`goodsID`)
+			</if>
+			<if test="Page.desc">
+				DESC
+			</if>
+		</if>
+		<if test="Page.orderBy==null">
+			<if test="Goods.keyWord!=null">
+				<![CDATA[ ORDER BY matchIndex(#{Goods.keyWord},goodsName,brand,keyword,promotion_sentence,properties,descriptionPage) DESC]]>
+			</if>
+		</if>
+		limit #{Page.startOption},#{Page.optionOfPage}
+	</select>
+	
+	<!-- 得到相关商品 -->
+	<select id="getRelatedGoods" resultType="Goods" parameterType="Goods">
+		SELECT goodsID,goodsName,product_price,reference_price,amount,brand,promotion_sentence,specification 
+		FROM goods
+		<![CDATA[ where matchRelatedIndex(#{keyWord},#{brand},#{typeID},keyword,brand,typeID)>0 AND goodsID NOT IN (#{goodsID}) AND sell = true]]>
+		Order By matchRelatedIndex(#{keyWord},#{brand},#{typeID},keyword,brand,typeID)
+		limit 0,10
+	</select>
+    <!-- 分页返回集合 -->
+	<select id="getListPage" resultType="Goods" parameterType="hashMap">
+		select * from goods
+		<where>
+			<if test="Goods.goodsID!=null">GoodsID=#{Goods.goodsID}</if>
+			<if test="Goods.goodsName!=null"> AND goodsName like "%${Goods.goodsName}%"</if>
+			<if test="Goods.productNumber!=null"> AND productNumber = #{Goods.productNumber}</if>
+			<if test="Goods.shelfNumber!=null"> AND shelfNumber = #{Goods.shelfNumber}</if>
+			
+			<if test="Goods.typeID!=null"> AND typeID like "${Goods.typeID}%"</if>
+						
+			<if test="Goods.brand!=null"> AND brand like "${Goods.brand}"</if>
+			
+			<if test="Goods.keyWord!=null"> AND CONCAT(brand,keyWord,goodsName,type,descriptionPage) like "%${Goods.keyWord}%"</if>
+			
+			<if test="Goods.sell!=null">AND sell=#{Goods.sell}</if>
+		</where>
+		<if test="Page.orderBy!=null">
+			Order By #{Page.orderBy}
+		</if>
+		limit #{Page.startOption},#{Page.optionOfPage}
+	</select>
+	
+	<!-- 返回分页总数 -->
+	<select id="getCountHashMap" resultType="int" parameterType="hashMap">
+		select count(goodsID) from goods
+		<where>
+			<if test="Goods.goodsID!=null">GoodsID=#{Goods.goodsID}</if>
+			<if test="Goods.goodsName!=null"> AND goodsName like "%${Goods.goodsName}%"</if>
+			<if test="Goods.productNumber!=null"> AND productNumber = #{Goods.productNumber}</if>
+			<if test="Goods.shelfNumber!=null"> AND shelfNumber = #{Goods.shelfNumber}</if>
+			
+			<if test="Goods.typeID!=null"> AND typeID like "${Goods.typeID}%"</if>
+						
+			<if test="Goods.brand!=null"> AND brand like "${Goods.brand}"</if>
+			
+			<if test="Goods.keyWord!=null"> AND CONCAT(brand,keyWord,goodsName,type,descriptionPage) like "%${Goods.keyWord}%"</if>
+			
+			<if test="Goods.sell!=null"> AND sell=#{Goods.sell}</if>
+		</where>
+	</select>
+	
+	<!-- 返回单个对象 -->
+	<select id="getObject" resultType="Goods" parameterType="Goods">
+		select *,fullTypeName(typeID) as 'fullTypeName',fullTypeID(typeID) as 'fullTypeID' from goods
+		<where>
+			<if test="goodsID!=null">GoodsID=#{goodsID}</if>
+			<if test="goodsName!=null"> AND AND CONCAT(#{brand},#{keyWord},#{goodsName},#{type}) like "%${goodsName}$"</if>
+			<if test="productNumber!=null"> AND productNumber = #{productNumber}</if>
+			<if test="shelfNumber!=null"> AND shelfNumber = #{shelfNumber}</if>
+			
+			<if test="typeID!=null"> AND typeID like "${typeID}%"</if>
+						
+			<if test="brand!=null"> AND brand like "${brand}"</if>
+			
+			<if test="keyWord!=null"> AND CONCAT(#{brand},#{keyWord},#{goodsName},#{type},#{descriptionPage}) like "%${keyWord}%"</if>
+			
+			<if test="sell!=null"> AND sell=#{sell}</if>
+		</where>
+	</select>
+	
+	<insert id="insert" parameterType="Goods" useGeneratedKeys="true" keyProperty="goodsID">
+		insert into goods(goodsName,productNumber,product_price,reference_price
+		,promotion_price,cost_price,specification
+		,promotion_sentence,shelfNumber,createDateTime,amount
+		,typeID,brand,points,keyWord,updateTimeStamp,sell
+		)
+		values(#{goodsName},#{productNumber},#{product_price},#{reference_price}
+		,#{promotion_price},#{cost_price},#{specification}
+		,#{promotion_sentence},#{shelfNumber},now(),#{amount}
+		,#{typeID},#{brand},#{points},#{keyWord},#{updateTimeStamp},#{sell}
+		)
+	</insert>
+	
+	<!-- 删除 -->
+	<delete id="delete" parameterType="Goods">
+		delete from goods where goodsID = #{goodsID}
+	</delete>
+	
+	<!-- 改 -->
+	<update id="update" parameterType="Goods">
+		update goods
+		<set>
+			updateTimeStamp = #{updateTimeStamp}
+			<if test="goodsName!=null"> ,goodsName = #{goodsName}</if>
+			<if test="productNumber!=null"> , productNumber = #{productNumber}</if>
+			<if test="product_price!=null"> , product_price = #{product_price}</if>
+			<if test="reference_price!=null"> , reference_price = #{reference_price}</if>
+			<if test="promotion_price!=null"> , promotion_price = #{promotion_price}</if>
+			<if test="cost_price!=null"> , cost_price = #{cost_price}</if>
+			<if test="specification!=null"> , specification = #{specification}</if>
+			<if test="purchase_count!=null"> , purchase_count =purchase_count+ #{purchase_count}</if>
+			<if test="browse_count!=null"> , browse_count =browse_count+ #{browse_count}</if>
+			<if test="collection_count!=null"> , collection_count =collection_count+ #{collection_count}</if>
+			<if test="shelfNumber!=null"> , shelfNumber = #{shelfNumber}</if>
+			<if test="promotion_sentence!=null"> , promotion_sentence = #{promotion_sentence}</if>			
+			<if test="typeID!=null"> , typeID = #{typeID}</if>
+			<if test="amount!=null"> , amount =amount+ #{amount}</if>
+			
+			<if test="points!=null"> , points =points + #{points}</if>
+			<if test="brand!=null"> , brand = #{brand}</if>
+			<if test="properties"> ,properties = #{properties}</if>
+			<if test="descriptionPage!=null"> , descriptionPage = #{descriptionPage}</if>
+			<if test="keyWord!=null"> , keyWord = #{keyWord}</if>
+			<if test="sell!=null" > , sell = #{sell}</if>
+		</set>
+		WHERE goodsID = #{goodsID}
+	</update>
+	
+	<select id="getCartGoods" parameterType="Goods" resultType="Goods">
+		select goodsID,goodsName,product_price,amount,promotion_sentence,specification
+		from goods
+		where goodsId = #{goodsID}
+	</select>
+	<select id="getRelevantGoodsList" parameterType="Goods" resultType="Goods">
+		SELECT goodsID,specification 
+		FROM goods 
+		WHERE CONCAT('-',(SELECT goodsIDs FROM relevantGoods WHERE CONCAT('-',goodsIDs,'-') LIKE CONCAT('%-',#{goodsID},'-%')),'-')
+		LIKE CONCAT('%-',goodsID,'-%')
+	</select>
+	<delete id="deleteGoods" parameterType="Goods">
+		call deleteGoods(#{goodsID});
+	</delete>
+</mapper>

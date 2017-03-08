@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="GoodsItem">
+	<resultMap type="GoodsItem" id="goodsItemGoods">
+		<result column="itemTitle" property="itemTitle"/>
+		<result column="itemImg" property="titleImg"/>
+		<collection property="goodsList" ofType="Goods" column="constantID">
+			<result column="goodsID" property="goodsID"/>
+			<result column="goodsName" property="goodsName"/>
+			<result column="sell" property="sell"/>
+			<result column="amount" property="amount"/>
+			<result column="product_price" property="product_price"/>
+			<result column="brand" property="brand"/>
+			<result column="specification" property="specification"/>
+			<result column="promotion_price" property="promotion_price"/>
+			<result column="promotion_sentence" property="promotion_sentence"/>
+			<result column="reference_price" property="reference_price"/>
+		</collection>
+	</resultMap>
+	<select id="getByPromotionID" parameterType="GoodsItem" resultMap="goodsItemGoods">
+		select goodsItem.*, goodsID,goodsName,specification,amount,product_price,brand,sell,promotion_sentence,reference_price,promotion_price
+		from goodsItem
+		left join goods
+		on CONCAT('-',goodsItem.goodsIDs,'-') LIKE CONCAT('%-',goods.`goodsID`,'-%')
+		where promotionID = #{promotionID}		
+	</select>
+	<delete id="delete" parameterType="GoodsItem">
+		delete from goodsItem
+		<where>
+			<if test="promotionID"> promotionID=#{promotionID}</if>
+			<if test="goodsItemID"> goodsItemID=#{goodsItemID}</if>
+		</where>
+	</delete>
+	<insert id="add" parameterType="GoodsItem">
+		insert into goodsItem(goodsItemID,promotionID,goodsIDs,itemTitle,itemImg)
+		values(#{goodsItenID},#{promotionID},#{goodsIDs},#{itemTitle},#{itemImg})
+	</insert>
+	<update id="update">
+		update goodsItem
+		<set>
+			<if test="goodsIDs!=null">goodsIDs=#{goodsIDs} , </if>
+			<if test="itemTitle!=null">itemTitle=#{itemTitle} , </if>
+			<if test="itemImg!=null">itmeImg=#{itemImg} , </if>
+		</set>
+		where goodsItemID = #{goodsItemID}
+	</update>
+</mapper>

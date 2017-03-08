@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+   <!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<package name="user" namespace="/user" extends="base-struts">
+		<interceptors>
+			<interceptor name="login" class="userLoginInterceptor" />
+			<interceptor-stack name="userStack">
+				<interceptor-ref name="baseStack">
+					<param name="modelDriven.refreshModelBeforeResult">true</param>
+				</interceptor-ref>
+				<interceptor-ref name="login"></interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+		<default-interceptor-ref name="userStack" />
+		<global-results>
+			<result name="href" type="redirect">${href}</result>
+			<result name="input">/input.jsp</result>
+			<result name="register" type="redirect">/register.html</result>
+			<result name="login" type="redirect">/login.html</result>
+		</global-results>
+		<action name="index" class="userAction" method="index">
+			<result name="index">/WEB-INF/jsp/user/userCenter/index.jsp</result>
+		</action>
+
+		<action name="user_*" class="userAction" method="{1}">
+			<result name="userInfo">/WEB-INF/jsp/user/userCenter/userInfo.jsp</result>
+			<result name="userAddress">/WEB-INF/jsp/user/userCenter/userAddress.jsp</result>
+			<result name="userCenter">/WEB-INF/jsp/user/userInfo.jsp</result>
+			<result name="userPoints">/WEB-INF/jsp/user/userCenter/userPoints.jsp</result>
+			<result name="coupon">/WEB-INF/jsp/user/userCenter/coupon.jsp</result>
+		</action>
+		<action name="order_*" class="orderAction" method="{1}">
+			<result name="confirmOrder">/WEB-INF/jsp/user/confirmOrder.jsp</result>
+			<result name="successOrder">/WEB-INF/jsp/user/successOrder.jsp</result>
+			<result name="orderPage">/WEB-INF/jsp/user/orderPage.jsp</result>
+			<result name="orderDetail">/WEB-INF/jsp/user/orderDetail.jsp</result>
+			<result name="comment">/WEB-INF/jsp/user/comment.jsp</result>
+		</action>
+		<action name="cart_*" class="cartAction" method="{1}">
+			<result name="confirmCart">/WEB-INF/jsp/user/confirmCart.jsp</result>
+		</action>
+		<action name="address_*" class="addressAction" method="{1}">
+		</action>
+		<action name="goods_*" class="userGoodsAction" method="{1}">
+			<result name="collectionList">/WEB-INF/jsp/user/collectionList.jsp</result>
+			<result name="BHList">/WEB-INF/jsp/user/BHList.jsp</result>
+		</action>
+	</package>
+</struts>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+   <!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<package name="admin" namespace="/admin" extends="base-struts">
+		<interceptors>
+			<interceptor name="login" class="com.haozhuoji.mall.struts2.action.interceptor.AdminLoginInterceptor" />
+			<interceptor-stack name="adminStack">
+				<interceptor-ref name="login"></interceptor-ref>
+				<interceptor-ref name="baseStack">
+					<param name="modelDriven.refreshModelBeforeResult">true</param>
+				</interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+		<default-interceptor-ref name="adminStack" />
+		<global-results>
+			<result name="input">/input.jsp</result>
+			<result name="loginPage">/WEB-INF/jsp/admin/login.jsp</result>
+			<result name="message" type="json">
+				<param name="root">action</param>
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">message</param>
+			</result>
+			<result name="index">/WEB-INF/jsp/admin/manager.jsp</result>
+		</global-results>
+		<action name="manager_*" class="managerAction" method="{1}">
+			<result name="forward">/WEB-INF/jsp/admin/${pageName}.jsp</result>
+		</action>
+		
+		<action name="goods_*" class="goodsAction" method="{1}">
+			<result name="listGoods">/WEB-INF/jsp/admin/goods/listGoods.jsp</result>
+			<result name="addUpdateInfo">/WEB-INF/jsp/admin/goods/addUpdateInfo.jsp</result>
+			<result name="updateProperties">/WEB-INF/jsp/admin/goods/updateProperties.jsp</result>
+			<result name="updatePage">/WEB-INF/jsp/admin/goods/updatePage.jsp</result>
+			<result name="jspPage">/WEB-INF/jsp/admin/goods/${jspPage}.jsp</result>
+			<result name="redireact_listGoods" type="redirectAction">goods_listGoods</result>
+		</action>
+		<action name="order_*" class="goodsActionAdmin" method="{1}">
+			<result name="printOrder">/WEB-INF/jsp/admin/printOrder.jsp</result>
+			<result name="deng">/WEB-INF/jsp/admin/print.jsp</result>
+			<result name="orderPage">/WEB-INF/jsp/admin/order.jsp</result>
+			<result name="listOrder">/WEB-INF/jsp/admin/listOrder.jsp</result>
+		</action>
+		<action name="relevantGoods_*" class="relevantGoodsAction" method="{1}">
+			<result name="relevantGoods">/WEB-INF/jsp/admin/goods/relevantGoods.jsp</result>
+		</action>
+		<action name="bundling_*" class="bundlingAction" method="{1}">
+			<result name="bundling">/WEB-INF/jsp/admin/goods/bundling.jsp</result>
+		</action>
+		<action name="goodsType_*" class="goodsTypeAction" method="{1}">
+			<result name="goodsType">/WEB-INF/jsp/admin/goods/goodsType.jsp</result>
+		</action>
+		<action name="pointToCoupon_*" class="pointToCouponAction" method="{1}">
+			<result name="pointToCoupon">/WEB-INF/jsp/admin/pointToCoupon.jsp</result>
+		</action>
+		<action name="activity_*" class="activityAction" method="{1}">
+			<result name="activityList">/WEB-INF/jsp/admin/activityList.jsp</result>
+		</action>
+		<action name="coupon_*" class="couponAction" method="{1}">
+			<result name="couponList">/WEB-INF/jsp/admin/couponList.jsp</result>
+		</action>
+		<action name="period_*" class="adminPeriodAction" method="{1}">
+			<result name="periodList">/WEB-INF/jsp/admin/periodList.jsp</result>
+		</action>
+		<action name="comment_*" class="commentAction" method="{1}">
+			<result name="commentList">/WEB-INF/jsp/admin/commentList.jsp</result>
+		</action>
+		<action name="order_*" class="adminOrderAction" method="{1}">
+			<result name="orderList">/WEB-INF/jsp/admin/orderList.jsp</result>
+			<result name="orderMonitor">/WEB-INF/jsp/admin/orderMonitor.jsp</result>
+			<result name="printOrder">/WEB-INF/jsp/admin/printOrder.jsp</result>
+		</action>
+		<action name="promotion_*" class="adminPromotionAction" method="{1}">
+			<result name="promotionList">/WEB-INF/jsp/admin/promotionList.jsp</result>
+		</action>
+		<action name="goodsItem_*" class="goodsItemAction" method="{1}">
+		</action>
+		<action name="slider_*" class="sliderAction" method="{1}">
+			<result name="sliderList">/WEB-INF/jsp/admin/sliderList.jsp</result>
+		</action>
+	</package>
+</struts>

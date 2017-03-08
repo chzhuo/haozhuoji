@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Promotion">
+	<select id="getPromotionByID" parameterType="Promotion" resultType="Promotion">
+		select *
+		from promotion
+		where promotionID = #{promotionID}		
+	</select>
+	<select id="getList" parameterType="Promotion" resultType="Promotion">
+		select * from promotion
+		<where>
+			<if test="promotionID!=null"> AND promotionID=#{promotionID}</if>
+			<if test="upIndex!=null"> AND upIndex=#{upIndex}</if>
+			<if test="upHeader!=null"> AND upHeader=#{upHeader}</if>
+		</where>
+	</select>
+	<resultMap type="Promotion" id="promotionGoodsItem">
+		<result column="promotionID" property="promotionID"/>
+		<result column="title" property="title"/>
+		<result column="titleImg" property="titleImg"/>
+		<result column="cssStyle" property="cssStyle"/>
+		<result column="beginDateTime" property="beginDateTime"/>
+		<result column="endDateTime" property="endDateTime"/>
+		<result column="updatePrice" property="updatePrice"/>
+		<result column="rePrice" property="rePrice"/>
+		<result column="goodsIDs" property="goodsIDs"/>
+		<result column="upIndex" property="upIndex"/>
+		<result column="upHeader" property="upHeader"/>
+		<collection property="goodsItem" ofType="GoodsItem" column="promotionID">
+			<result column="goodsItemID" property="goodsItemID"/>
+			<result column="promotionID" property="promotionID"/>
+			<result column="goodsIDs" property="goodsIDs"/>
+			<result column="itemTitle" property="itemTitle"/>
+			<result column="itemImg" property="itemImg"/>
+		</collection>
+	</resultMap>
+	<select id="getAll" resultMap="promotionGoodsItem">
+		select * from promotion
+		left join goodsItem 
+		on promotion.promotionID = goodsItem.promotionID
+	</select>
+	<delete id="delete" parameterType="Promotion">
+		delete from promotion
+		where promotionID = #{promotionID}
+	</delete>
+	<update id="update" parameterType="Promotion">
+		update promotion
+		<set>
+			<if test="title!=null"> title=#{title} , </if>
+			<if test="titleImg!=null"> titleImg=#{titleImg} , </if>
+			<if test="cssStyle!=null"> cssStyle=#{cssStyle} , </if>
+			<if test="beginDateTime!=null"> beginDateTime=#{beginDateTime} , </if>
+			<if test="endDateTime!=null"> endDateTime=#{endDateTime} , </if>
+			<if test="goodsIDs!=null"> goodsIDs=#{goodsIDs} , </if>
+			<if test="upIndex!=null"> upIndex=#{upIndex} , </if>
+			<if test="upHeader!=null"> upHeader=#{upHeader} , </if>
+		</set>
+		where promotionID = #{promotionID}
+	</update>
+	<insert id="add" parameterType="Promotion">
+		insert into promotion(title,titleImg,cssStyle,beginDateTime,endDateTime,updatePrice,rePrice,goodsIDs,upIndex,upHeader)
+		values(#{title},#{titleImg},#{cssStyle},#{beginDateTime},#{endDateTime},false,false,#{goodsIDs},#{upIndex},#{upHeader})
+	</insert>
+</mapper>

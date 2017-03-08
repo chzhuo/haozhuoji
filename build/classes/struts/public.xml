@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+   <!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<package name="public" namespace="/" extends="base-struts">
+		
+		<!-- 默认使用HTML静态页面 -->
+		<default-action-ref name="html" />
+		<global-results>
+			<result name="index" type="redirectAction">goods</result>
+			<result name="message" type="json">
+				<param name="root">action</param>
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">message</param>
+			</result>
+			<result type="redirect" name="href">${href}</result>
+			<result name="input">main.jsp</result>
+			<result name="searchPage">/WEB-INF/jsp/public/searchPage.jsp</result>
+			<result name="classPage">/WEB-INF/jsp/public/classPage.jsp</result>
+		</global-results>
+
+		<action name="g_*"  class="publicGoodsAction" method="detailPage">
+			<result name="detailPage">/WEB-INF/jsp/public/detailPage.jsp</result>
+			<result name="merry" type="json"></result>
+		</action>
+		<action name="t_*"  class="publicGoodsAction" method="goodsType">
+		</action>
+		
+		<action name="index" class="publicGoodsAction" method="index">
+			<result>/WEB-INF/jsp/public/index.jsp</result>
+		</action>
+		
+		<action name="html" class="publicGoodsAction" method="html">
+		</action>
+		
+		<action name="search" class="publicGoodsAction" method="search">
+		</action>
+		
+		<action name="loginRegister_*" class="loginRegisterAction" method="{1}">
+			<result name="loginFrame">/WEB-INF/jsp/public/loginFrame.jsp</result>			
+		</action>
+		<action name="getComment" class="publicGoodsAction" method="getComment">
+		</action>
+		
+		<action name="forgettenPassword" class="loginRegisterAction" method="forgettenPassword">
+			<result name="forgettenPassword">/WEB-INF/jsp/public/forgettenPassword.jsp</result>
+		</action>
+		<action name="getPassword" class="loginRegisterAction" method="getPassword">
+			<result name="getPassword">/WEB-INF/jsp/public/getPassword.jsp</result>
+		</action>
+		<action name="sendEmailSuccess" class="loginRegisterAction" method="sendEmailSuccess">
+			<result name="sendEmailSuccess">/WEB-INF/jsp/public/sendEmailSuccess.jsp</result>
+		</action>
+		<action name="changePassword" class="loginRegisterAction" method="changePassword">
+		</action>
+		<action name="successRePassword" class="loginRegisterAction" method="successRePassword">
+			<result name="successRePassword">/WEB-INF/jsp/public/successRePassword.jsp</result>
+		</action>
+		<action name="login" class="loginRegisterAction" method="toLogin">
+			<result name="login">/WEB-INF/jsp/public/login.jsp</result>
+		</action>
+		<action name="register" class="loginRegisterAction" method="toRegister">
+			<result name="register">/WEB-INF/jsp/public/register.jsp</result>
+		</action>
+		<action name="logout" class="loginRegisterAction" method="logout">
+		</action>
+		<action name="period_*" class="periodAction" method="{1}">
+		</action>
+		<action name="promotion" class="promotionAction" method="promotion">
+			<result name="promotion">/WEB-INF/jsp/public/promotion.jsp</result>
+		</action>
+	</package>
+</struts>

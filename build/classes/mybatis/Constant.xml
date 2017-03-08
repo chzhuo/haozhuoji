@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Constant">
+	<resultMap type="Constant" id="goodsByValue2">
+		<result column="constantID" property="constantID"/>
+		<result column="value1" property="value1"/>
+		<result column="value2" property="value2"/>
+		<result column="value3" property="value3"/>
+		<result column="k" property="k"/>
+		<collection property="goodsList" ofType="Goods" column="constantID">
+			<result column="goodsID" property="goodsID"/>
+			<result column="goodsName" property="goodsName"/>
+			<result column="sell" property="sell"/>
+			<result column="amount" property="amount"/>
+			<result column="product_price" property="product_price"/>
+			<result column="brand" property="brand"/>
+			<result column="specification" property="specification"/>
+			<result column="promotion_sentence" property="promotion_sentence"/>
+			<result column="reference_price" property="reference_price"/>
+		</collection>
+	</resultMap>
+	<select id="getGoodsByValue2" resultMap="goodsByValue2" parameterType="Constant">
+		SELECT constant.*,goodsID,goodsName,specification,amount,product_price,brand,sell,promotion_sentence,reference_price FROM constant
+		LEFT JOIN goods
+		ON CONCAT('-',value2,'-') LIKE CONCAT('%-',goodsID,'-%') AND goods.sell = true
+		WHERE k = #{k}
+		ORDER BY i 
+	</select>
+	<select id="getByKey" parameterType="Constant" resultType="Constant">
+		select * from constant
+		where k = #{k}
+	</select>
+</mapper>

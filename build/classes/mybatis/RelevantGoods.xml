@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="RelevantGoods">
+	<select id="getAllRelevantGoods" resultType="RelevantGoods">
+		select * from relevantGoods
+	</select>
+	<select id="checkGoodsID" resultType="RelevantGoods" parameterType="RelevantGoods">
+		select * from relevantGoods
+		where concat('-',goodsIDs,'-') like concat('%-',#{goodsIDs},'-%')
+		<if test="notInID!=null">
+			AND relevantGoodsID NOT IN (#{notInID})
+		</if>
+	</select>
+	<insert id="add" parameterType="RelevantGoods" keyProperty="relevantGoodsID">
+		insert into relevantGoods(goodsIDs)
+		values(#{goodsIDs})
+	</insert>
+	<delete id="delete" parameterType="RelevantGoods">
+		delete from relevantGoods 
+		where relevantGoodsID = #{relevantGoodsID}
+	</delete>
+	<update id="update" parameterType="RelevantGoods">
+		update relevantGoods
+		set goodsIDs = #{goodsIDs}
+		where relevantGoodsID = #{relevantGoodsID}		
+	</update>
+</mapper>

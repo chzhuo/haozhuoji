@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Comment">
+    <!-- 分页返回集合 -->
+	<select id="getList" resultType="Comment" parameterType="hashMap">
+		select comment.*,user.nickName from comment
+		left join user
+		on comment.userID = user.userID
+		<where>
+			<if test="Comment.commentID!=null">commentID=#{Comment.commentID}</if>
+			<if test="Comment.userID!=null"> AND userID=#{Comment.userID}</if>
+			<if test="Comment.goodsID!=null"> AND goodsID = #{Comment.goodsID}</if>
+			<if test="Comment.orderID!=null"> AND orderID = #{Comment.orderID}</if>
+			<if test="Comment.showFlag!=null"> AND showFlag = #{Comment.showFlag}</if>
+			<if test="Comment.delFlag!=null"> AND delFlag = #{Comment.delFlag}</if>
+			<if test="Comment.point!=null"> AND point = #{Comment.point}</if>
+		</where>
+		<if test="Page.orderBy!=null">
+			order by
+			<if test="Page.orderBy.equals('commentID')">
+				comment.commentID
+			</if>
+			<if test="Page.orderBy.equals('orderID')">
+				comment.orderID
+			</if>
+			<if test="Page.orderBy.equals('userID')">
+				comment.userID
+			</if>
+			<if test="Page.orderBy.equals('point')">
+				comment.point
+			</if>
+			<if test="Page.orderBy.equals('goodsID')">
+				comment.goodsID
+			</if>
+			<if test="Page.orderBy.equals('showFlag')">
+				comment.showFlag
+			</if>
+			<if test="desc">
+			desc
+			</if>
+			,comment.createDateTime desc
+		</if>
+		<if test="Page.orderBy==null">
+			ORDER BY comment.createDateTime DESC
+		</if>
+		limit #{Page.startOption},#{Page.optionOfPage}
+	</select>
+	
+	<!-- 返回分页总数 -->
+	<select id="getCount" resultType="int" parameterType="Comment">
+		select count(commentID) from Comment
+		<where>
+			<if test="commentID!=null">CommentID=#{commentID}</if>
+			<if test="userID!=null"> AND userID=#{userID}</if>
+			<if test="goodsID!=null"> AND goodsID = #{goodsID}</if>
+			<if test="orderID!=null"> AND orderID = #{orderID}</if>
+			<if test="showFlag!=null"> AND showFlag = #{showFlag}</if>
+			<if test="delFlag!=null"> AND delFlag = #{delFlag}</if>
+			<if test="point!=null"> AND point = #{point}</if>
+		</where>
+	</select>
+	
+	<!-- 返回单个对象 -->
+	<select id="getObject" resultType="Comment" parameterType="Comment">
+		select * from comment
+		<where>
+			<if test="commentID!=null">commentID=#{commentID}</if>
+			<if test="userID!=null"> AND userID=#{userID}</if>
+			<if test="goodsID!=null"> AND goodsID = #{goodsID}</if>
+			<if test="orderID!=null"> AND orderID = #{orderID}</if>
+			<if test="showFlag!=null"> AND showFlag = #{showFlag}</if>
+			<if test="delFlag!=null"> AND delFlag = #{delFlag}</if>
+		</where>
+	</select>
+	
+	<!-- 增加 -->
+	<insert id="add" parameterType="Comment" useGeneratedKeys="true" keyProperty="CommentID">
+		insert into Comment(userID,goodsID,orderID,point,content,createDateTime,showFlag,delFlag)
+		values(#{userID},#{goodsID},#{orderID},#{point},#{content},now(),#{showFlag},#{delFlag})
+	</insert>
+	
+	<!-- 改 -->
+	<update id="update" parameterType="Comment">
+		update Comment
+		<set>
+			<if test="reply!=null">reply = #{reply},replyDateTime=now() , </if>
+			<if test="showFlag!=null">showFlag=#{showFlag} , </if>
+			<if test="delFlag!=null">delFlag=#{delFlag} , </if>
+		</set>
+		WHERE commentID = #{commentID}
+	</update>
+	<select id="getCeilAvgPointCount" parameterType="Comment" resultType="Comment">
+		SELECT CEIL(AVG(POINT)) as 'point',COUNT(commentID) as 'count' FROM COMMENT
+		WHERE goodsID = #{goodsID}
+	</select>
+</mapper>

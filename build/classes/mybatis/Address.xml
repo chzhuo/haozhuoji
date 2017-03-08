@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Address">
+    <!-- 分页返回集合 -->
+	<select id="getList" resultType="Address" parameterType="Address">
+		select * from address
+		<where>
+			<if test="addressID!=null">addressID=#{addressID}</if>
+			<if test="userID!=null"> AND userID=#{userID}</if>
+			<if test="flag!=null"><![CDATA[ AND flag&#{flag}=#{flag}]]></if>
+		</where>
+	</select>
+	
+	<!-- 返回分页总数 -->
+	<select id="getCount" resultType="int" parameterType="Address">
+		select count(addressID) from address
+		<where>
+			<if test="addressID!=null">addressID=#{addressID}</if>
+			<if test="userID!=null"> AND userID=#{userID}</if>
+			<if test="name!=null"> AND name like "%${name}%"</if>
+			<if test="cellphone!=null"> AND cellphone = #{cellphone}</if>
+			<if test="flag!=null"><![CDATA[ AND flag&#{flag}=#{flag}]]></if>
+		</where>
+	</select>
+	
+	<!-- 返回单个对象 -->
+	<select id="getObject" resultType="Address" parameterType="Address">
+		select * from address
+		<where>
+			<if test="addressID!=null">addressID=#{addressID}</if>
+			<if test="userID!=null"> AND userID=#{userID}</if>
+			<if test="name!=null"> AND name like "%${name}%"</if>
+			<if test="cellphone!=null"> AND cellphone like #{cellphone}</if>
+			<if test="flag!=null"><![CDATA[ AND flag&#{flag}=#{flag}]]></if>
+		</where>
+	</select>
+	
+	<!-- 增加 -->
+	<insert id="add" parameterType="Address" useGeneratedKeys="true" keyProperty="addressID">
+		insert into Address(addressID,userID,name,address,cellphone,flag)
+		values(#{addressID},#{userID},#{name},#{address},#{cellphone},#{flag})
+	</insert>
+	
+	<!-- 删除 -->
+	<delete id="delete" parameterType="Address">
+		delete from address where addressID = #{addressID}
+	</delete>
+	
+	<!-- 改 -->
+	<update id="update" parameterType="Address">
+		update Address
+		<set>
+			<if test="addressID!=null"> addressID=#{addressID},</if>
+			<if test="userID!=null"> userID=#{userID},</if>
+			<if test="name!=null"> name = #{name},</if>
+			<if test="cellphone!=null"> cellphone = #{cellphone},</if>
+			<if test="paramFlag!=null"> flag = flag+#{paramFlag},</if>
+		</set>
+		where userID = #{userID}
+		<if test="addressID!=null"> and addressID = #{addressID}</if>
+		<if test="flag!=null"><![CDATA[ and flag&#{flag}=#{flag}]]></if>
+	</update>
+</mapper>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BrowseHistory">
+	<resultMap type="BrowseHistory" id="pageList">
+		<result column="createDateTime" property="createDateTime"/>
+		<result column="browseHistoryID" property="browseHistoryID"/>
+		<collection property="goods" ofType="Goods" column="goodsID" >
+			<result column="goodsID" property="goodsID"/>
+			<result column="goodsName" property="goodsName"/>
+			<result column="sell" property="sell"/>
+			<result column="amount" property="amount"/>
+			<result column="product_price" property="product_price"/>
+			<result column="brand" property="brand"/>
+			<result column="specification" property="specification"/>
+			<result column="promotion_sentence" property="promotion_sentence"/>
+		</collection>
+	</resultMap>
+    <!-- 分页返回集合 -->
+	<select id="getPageList" resultMap="pageList" parameterType="hashMap">
+		select browseHistory.goodsID,browseHistoryID,browseHistory.createDateTime,userID,sell,goodsName,amount,product_price,promotion_sentence,specification,brand from BrowseHistory
+		LEFT JOIN goods
+		ON browsehistory.`goodsID` = goods.`goodsID`
+		Where browseHistory.userID=#{BrowseHistory.userID}
+		ORDER BY browseHistory.createDateTime DESC
+		limit #{Page.startOption},#{Page.optionOfPage}
+	</select>
+	
+	<!-- 返回分页总数 -->
+	<select id="getOptionCount" resultType="int" parameterType="hashMap">
+		SELECT COUNT(browseHistoryID) FROM browsehistory 
+		WHERE userID = #{BrowseHistory.userID}
+	</select>
+	
+	<!-- 返回单个对象 -->
+	<select id="getObject" resultType="BrowseHistory" parameterType="BrowseHistory">
+		select * from BrowseHistory
+		<where>
+			<if test="browseHistoryID!=null">BrowseHistoryID=#{browseHistoryID}</if>
+			<if test="userID!=null"> AND userID=#{userID}</if>
+			<if test="goodsID!=null"> AND goodsID = #{goodsID}</if>
+		</where>
+	</select>
+	
+	<!-- 增加 -->
+	<insert id="add" parameterType="BrowseHistory" useGeneratedKeys="true" keyProperty="browseHistoryID">
+		insert into BrowseHistory(userID,goodsID,createDateTime)
+		values(#{userID},#{goodsID},now())
+	</insert>
+	
+	<!-- 删除 -->
+	<delete id="delete" parameterType="BrowseHistory">
+		delete from BrowseHistory 
+		where goodsID=#{goodsID} AND userID = #{userID}
+	</delete>
+	<update id="update" parameterType="BrowseHistory">
+		update browseHistory set createDateTime = now()
+	</update>
+</mapper>

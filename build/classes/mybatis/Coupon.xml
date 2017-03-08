@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Coupon">
+	<select id="getListPage" parameterType="hashMap" resultType="Coupon">
+		SELECT *,fullTypeName(goodsType.typeID) as 'fullTypeName' FROM coupon
+		left join goodstype
+		on coupon.typeID = goodstype.typeID
+		<where>
+			<if test="Coupon.typeID!=null"> AND fullTypeID(coupon.typeID) like concat(fullTypeID(#{Coupon.typeID}),'%')</if>
+			<if test="Coupon.bindUserID!=null">And bindUserID=#{Coupon.bindUserID}</if>
+			<if test="Coupon.couponID!=null">And couponID=#{Coupon.couponID}</if>
+			<if test="Coupon.couponNumber!=null">and couponNumber=#{Coupon.couponNumber}</if>
+			<if test="Coupon.issue!=null">AND issue=#{Coupon.issue}</if>
+			<if test="Coupon.used!=null">AND used=#{Coupon.used}</if>
+		</where>
+		<if test="Page.orderBy!=null">
+			ORDER BY
+			<if test="Page.orderBy.equals('typeID')">coupon.TypeID</if>
+			<if test="Page.orderBy.equals('bindUserID')">bindUserID</if>
+			<if test="Page.orderBy.equals('couponID')">couponID</if>
+			<if test="Page.orderBy.equals('couponNumber')">couponNumber</if>
+			<if test="Page.orderBy.equals('rech')">rech</if>
+			<if test="Page.orderBy.equals('sub')">sub</if>
+			<if test="Page.orderBy.equals('beginDateTime')">beginDateTime</if>
+			<if test="Page.orderBy.equals('endDateTime')">endDateTime</if>
+			<if test="Page.orderBy.equals('createDateTime')">createDateTime</if>
+			<if test="Page.desc">
+				DESC
+			</if>
+		</if>
+		limit #{Page.startOption},#{Page.optionOfPage}
+	</select>
+	<select id="getPageCount" parameterType="hashMap" resultType="int">
+		SELECT count(couponID) from Coupon
+		<where>
+			<if test="Coupon.typeID!=null"> AND fullTypeID(coupon.typeID) like concat(fullTypeID(#{Coupon.typeID}),'%')</if>
+			<if test="Coupon.bindUserID!=null">And bindUserID=#{Coupon.bindUserID}</if>
+			<if test="Coupon.couponID!=null">And couponID=#{Coupon.couponID}</if>
+			<if test="Coupon.couponNumber!=null">and couponNumber=#{Coupon.couponNumber}</if>
+			<if test="Coupon.issue!=null">AND issue=#{Coupon.issue}</if>
+			<if test="Coupon.used!=null">AND used=#{Coupon.used}</if>
+		</where>
+	</select>
+	<update id="adminUpdate"	parameterType="Coupon">
+		UPDATE coupon
+		<set>
+			<if test="typeID!=null"> typeID=#{typeID},</if>
+			<if test="rech!=null"> rech=#{rech},</if>
+			<if test="sub!=null"> sub=#{sub},</if>
+			<if test="beginDateTime!=null"> beginDateTime=#{beginDateTime},</if>
+			<if test="endDateTime!=null"> endDateTime=#{endDateTime},</if>
+			<if test="issue!=null"> issue=#{issue},</if>
+		</set>
+		where couponID=#{couponID}
+	</update>
+    <!-- 分页返回集合 -->
+	<select id="getObject" parameterType="Coupon" resultType="Coupon">
+		SELECT *,fullTypeName(goodsType.typeID) as 'fullTypeName' FROM coupon
+		left join goodstype
+		on coupon.typeID = goodstype.typeID
+		<where>
+			<if test="couponID!=null">And couponID=#{couponID}</if>
+			<if test="couponNumber!=null">and couponNumber=#{couponNumber}</if>
+		</where>
+	</select>
+	<select id="getList" parameterType="Coupon" resultType="Coupon">
+		SELECT *,fullTypeName(goodsType.typeID) as 'fullTypeName' FROM coupon
+		left join goodstype
+		on coupon.typeID = goodstype.typeID
+		<where>
+			<if test="bindUserID!=null">And bindUserID=#{bindUserID}</if>
+			<if test="couponID!=null">And couponID=#{couponID}</if>
+			<if test="couponNumber!=null">and couponNumber=#{couponNumber}</if>
+		</where>
+	</select>
+	<update id="update" parameterType="Coupon">
+		update coupon
+		<set>
+			<if test="bindUserID!=null"> bindUserID = #{bindUserID}</if>
+			<if test="used!=null"> used=true,</if>
+		</set>
+		<where>
+			<if test="couponNumber!=null"> AND couponNumber = #{couponNumber}</if>
+			<if test="couponID!=null"> AND couponID = #{couponID}</if>
+		</where>
+	</update>
+	<insert id="add" parameterType="Coupon">
+		insert into coupon(couponNumber,rech,sub,beginDateTime,endDateTime,typeID,issue,used,bindUserID,createDateTime)
+		values(#{couponNumber},#{rech},#{sub},#{beginDateTime},#{endDateTime},#{typeID},#{issue},#{used},#{bindUserID},now())
+	</insert>
+	<select id="getAbleCoupon" parameterType="Coupon" resultType="Coupon">
+		<![CDATA[
+			SELECT *,fullTypeName(typeID) AS 'fullTypeName',
+				(SELECT  CASE WHEN SUM(returnPrice(goods.`product_price`,bundling.`price`)*cart.`count`) IS NULL THEN 0 ELSE SUM(returnPrice(goods.`product_price`,bundling.`price`)*cart.`count`) END FROM cart
+				LEFT JOIN bundling
+				ON bundling.`bundlingID` = cart.`bundlingID`
+				LEFT JOIN goods
+				ON cart.`goodsID` = goods.`goodsID`
+				WHERE userID = #{bindUserID} AND (IF(goods.`goodsID` IS NOT NULL,CONCAT(fullTypeID(goods.typeID),'-') LIKE CONCAT(fullTypeID(coupon.`typeID`),'-%'),FALSE) OR IF(coupon.`typeID`=0,TRUE,FALSE))
+				) AS 'totalPrice'
+			FROM coupon
+			WHERE bindUserID = #{bindUserID} AND endDateTime > NOW() AND used = 0 AND issue=1
+		]]>
+		<if test="couponNumber"> AND couponNumber=#{couponNumber}</if>
+	</select>
+	<select id="getNewCoupon" parameterType="Coupon" resultType="Coupon">
+		<![CDATA[
+			SELECT *,fullTypeName(typeID) AS 'fullTypeName',
+				(SELECT  CASE WHEN SUM(returnPrice(goods.`product_price`,bundling.`price`)*cart.`count`) IS NULL THEN 0 ELSE SUM(returnPrice(goods.`product_price`,bundling.`price`)*cart.`count`) END FROM cart
+				LEFT JOIN bundling
+				ON bundling.`bundlingID` = cart.`bundlingID`
+				LEFT JOIN goods
+				ON cart.`goodsID` = goods.`goodsID`
+				WHERE userID = #{bindUserID} AND (IF(goods.`goodsID` IS NOT NULL,CONCAT(fullTypeID(goods.typeID),'-') LIKE CONCAT(fullTypeID(coupon.`typeID`),'-%'),FALSE) OR IF(coupon.`typeID`=0,TRUE,FALSE))
+				) AS 'totalPrice'
+			FROM coupon
+			WHERE couponNumber = #{couponNumber}
+		]]>
+	</select>
+	<select id="getCookieCoupon" parameterType="Coupon" resultType="Coupon">
+	<![CDATA[
+		SELECT *,fullTypeName(typeID) AS 'fullTypeName'
+		FROM coupon
+		WHERE bindUserID = #{bindUserID} AND endDateTime > NOW() AND beginDateTime<NOW() AND used = 0 AND issue=1 AND couponNumber=#{couponNumber} AND
+		(SELECT  CASE WHEN SUM(returnPrice(goods.`product_price`,bundling.`price`)*cart.`count`) IS NULL THEN 0 ELSE SUM(returnPrice(goods.`product_price`,bundling.`price`)*cart.`count`) END FROM cart
+		LEFT JOIN bundling
+		ON bundling.`bundlingID` = cart.`bundlingID`
+		LEFT JOIN goods
+		ON cart.`goodsID` = goods.`goodsID`
+		WHERE userID = #{bindUserID} AND (IF(goods.`goodsID` IS NOT NULL,CONCAT(fullTypeID(goods.typeID),'-') LIKE CONCAT(fullTypeID(coupon.`typeID`),'-%'),FALSE) OR IF(coupon.`typeID`=0,TRUE,FALSE))
+		)>rech
+	]]>
+	</select>
+	<select id="getOrderCoupon" parameterType="Coupon" resultType="Coupon">
+	<![CDATA[
+		SELECT *,fullTypeName(typeID) AS 'fullTypeName'
+		FROM coupon
+		WHERE bindUserID = #{bindUserID} AND endDateTime > NOW() AND beginDateTime<NOW() AND used = 0 AND issue=1 AND couponNumber=#{couponNumber} AND
+		(SELECT  CASE WHEN SUM(returnPrice(goods.`product_price`,bundling.`price`)*cart.`count`) IS NULL THEN 0 ELSE SUM(returnPrice(goods.`product_price`,bundling.`price`)*cart.`count`) END FROM cart
+		LEFT JOIN bundling
+		ON bundling.`bundlingID` = cart.`bundlingID`
+		LEFT JOIN goods
+		ON cart.`goodsID` = goods.`goodsID`
+		WHERE (userID = #{bindUserID} OR userID is null) AND (IF(goods.`goodsID` IS NOT NULL,CONCAT(fullTypeID(goods.typeID),'-') LIKE CONCAT(fullTypeID(coupon.`typeID`),'-%'),FALSE) OR IF(coupon.`typeID`=0,TRUE,FALSE))
+		)>rech
+	]]>
+	</select>
+	<delete id="delete" parameterType="Coupon">
+		delete from coupon 
+		where couponID = #{couponID}
+	</delete>
+</mapper>

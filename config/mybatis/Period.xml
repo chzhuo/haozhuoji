@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Period">
+	<select id="getList" parameterType="Period" resultType="Period">
+		SELECT *,IF(TIME>CURRENT_TIME(),TRUE,FALSE) AS 'outTime'  FROM period
+		<where>
+			<if test="periodID!=null">AND periodID=#{periodID}</if>
+			<if test="time!=null"> AND time>#{time}</if>
+			<if test="weekday!=null"> AND weekday=#{weekday}</if>
+			<if test="date!=null"> AND date=#{date}</if>
+		</where>
+		ORDER BY `time`
+	</select>
+	<select id="getNextPeriod" resultType="Period">
+		SELECT * FROM period WHERE TIME >NOW() LIMIT 1
+	</select>
+	<select id="getFirstPeriod" resultType="Period">
+		SELECT * FROM period LIMIT 1
+	</select>
+	
+	<select id="getAllPeriod" parameterType="Period" resultType="Period">
+		SELECT * FROM period ORDER BY WEEKDAY,TIME
+	</select>
+		
+	<insert id="add" parameterType="Period" keyProperty="periodID">
+		insert into period(time,timePeriod,weekday,printTime,aheadOfDay)
+		values(#{time},#{timePeriod},#{weekday},#{printTime},#{aheadOfDay})
+	</insert>
+	<delete id="delete" parameterType="Period">
+		delete from period where periodID = #{periodID}
+	</delete>
+	<update id="update" parameterType="Period">
+		update period
+		<set>
+			<if test="time!=null">time=#{time} ,</if>
+			<if test="timePeriod!=null">timePeriod=#{timePeriod} ,</if>
+			<if test="weekday!=null">weekday=#{weekday} ,</if>
+			<if test="printTime!=null">printTime=#{printTime} ,</if>
+			<if test="aheadOfDay!=null">aheadOfDay=#{aheadOfDay} ,</if>
+		</set>
+		where periodID = #{periodID}
+	</update>
+</mapper>

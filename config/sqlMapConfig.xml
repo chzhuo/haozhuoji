@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<typeAliases>
+		<typeAlias type="com.haozhuoji.mall.domain.Address" alias="Address" />
+		<typeAlias type="com.haozhuoji.mall.domain.BrowseHistory" alias="BrowseHistory" />
+		<typeAlias type="com.haozhuoji.mall.domain.Cart" alias="Cart" />
+		<typeAlias type="com.haozhuoji.mall.domain.Collection" alias="_Collection" />
+		<typeAlias type="com.haozhuoji.mall.domain.Comment" alias="Comment" />
+		<typeAlias type="com.haozhuoji.mall.domain.GatherOrder" alias="GatherOrder" />
+		<typeAlias type="com.haozhuoji.mall.domain.Goods" alias="Goods" />
+		<typeAlias type="com.haozhuoji.mall.domain.Order" alias="Order" />
+		<typeAlias type="com.haozhuoji.mall.domain.OrderGoods" alias="OrderGoods" />
+		<typeAlias type="com.haozhuoji.mall.domain.KeyWord" alias="KeyWord" />
+		<typeAlias type="com.haozhuoji.mall.domain.User" alias="User" />
+		<typeAlias type="com.haozhuoji.mall.domain.GoodsType" alias="GoodsType" />
+		<typeAlias type="com.haozhuoji.mall.domain.Period" alias="Period" />
+		<typeAlias type="com.haozhuoji.mall.domain.Activity" alias="Activity" />
+		<typeAlias type="com.haozhuoji.mall.domain.RelevantGoods" alias="RelevantGoods" />
+		<typeAlias type="com.haozhuoji.mall.domain.Bundling" alias="Bundling" />
+		<typeAlias type="com.haozhuoji.mall.domain.PointToCoupon" alias="PointToCoupon" />
+		<typeAlias type="com.haozhuoji.mall.domain.Coupon" alias="Coupon" />
+		<typeAlias type="com.haozhuoji.mall.domain._Constant" alias="Constant" />
+		<typeAlias type="com.haozhuoji.mall.domain.Promotion" alias="Promotion" />
+		<typeAlias type="com.haozhuoji.mall.domain.GoodsItem" alias="GoodsItem" />
+		<typeAlias type="com.haozhuoji.mall.domain.Slider" alias="Slider" />
+	</typeAliases>
+	<mappers>
+		<!-- 映射文件的位置 -->
+		<mapper resource="mybatis/User.xml" />
+		<mapper resource="mybatis/Cart.xml" />
+		<mapper resource="mybatis/GoodsType.xml" />
+		<mapper resource="mybatis/Goods.xml" />
+		<mapper resource="mybatis/Period.xml" />
+		<mapper resource="mybatis/Address.xml" />
+		<mapper resource="mybatis/Activity.xml" />
+		<mapper resource="mybatis/RelevantGoods.xml" />
+		<mapper resource="mybatis/Bundling.xml" />
+		<mapper resource="mybatis/PointToCoupon.xml" />
+		<mapper resource="mybatis/Coupon.xml" />
+		<mapper resource="mybatis/Order.xml" />
+		<mapper resource="mybatis/OrderGoods.xml" />
+		<mapper resource="mybatis/Comment.xml" />
+		<mapper resource="mybatis/BrowseHistory.xml" />
+		<mapper resource="mybatis/Collection.xml" />
+		<mapper resource="mybatis/KeyWord.xml" />
+		<mapper resource="mybatis/Constant.xml" />
+		<mapper resource="mybatis/Promotion.xml" />
+		<mapper resource="mybatis/Slider.xml" />
+	</mappers>
+</configuration>

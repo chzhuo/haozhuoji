@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="KeyWord">
+	<select id="getHotKeyWords" resultType="KeyWord">
+		SELECT hotKeyWords() AS 'word'
+	</select>
+	<insert id="add" parameterType="KeyWord" keyProperty="keyWordID">
+		insert into keyWord(word,count)
+		values(#{word},1)
+	</insert>
+	<update id="update" parameterType="KeyWord">
+		update keyWord set count = count + 1
+		<where>
+			<if test="keyWordID!=null"> AND keyWordID = #{keyWordID}</if>
+			<if test="word!=null"> AND word = #{word}</if>
+		</where>
+	</update>
+	<select id="getObject" parameterType="KeyWord" resultType="KeyWord">
+		select * from keyWord
+			<where>
+			<if test="keyWordID!=null"> AND keyWordID = #{keyWordID}</if>
+			<if test="word!=null"> AND word = #{word}</if>
+		</where>
+	</select>
+</mapper>

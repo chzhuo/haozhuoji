@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Order">
+	<resultMap type="Order" id="user_getOrder">
+		<result property="orderID" column="orderID"/>
+		<result property="orderNumber" column="orderNumber"/>
+		<result property="userID" column="userID"/>
+		<result property="goods_price" column="goods_price"/>
+		<result property="order_price" column="order_price"/>
+		<result property="timePeriod" column="timePeriod"/>
+		<result property="distributionTime" column="distributionTime"/>
+		<result property="createDateTime" column="createDateTime"/>
+		<result property="printDateTime" column="printDateTime"/>
+		<result property="address" column="address"/>
+		<result property="send_price" column="send_price"/>
+		<result property="points" column="points"/>
+		<result property="orderCouponInfo" column="orderCouponInfo"/>
+		<result property="orderInfo" column="orderInfo"/>
+		<result property="leaveMessage" column="leaveMessage"/>
+		<result property="print" column="print"/>
+		<result property="cancel" column="cancel"/>
+		<result property="del" column="del"/>
+		<result property="comment" column="comment"/>
+		<result property="addPoint" column="addPoint"/>
+		<collection property="orderGoodsList" column="orderID" ofType="OrderGoods">
+			<result column="orderGoodsID" property="orderGoodsID"/>
+			<result column="goodsIDs" property="goodsIDs"/>
+			<result column="goodsName" property="goodsName"/>
+			<result column="amount" property="amount"/>
+			<result column="product_price" property="product_price"/>
+			<result column="orderGoodsComment" property="comment"/>
+		</collection>
+	</resultMap>
+    <!-- 分页返回集合 -->
+	<select id="getList" resultType="Order" parameterType="hashMap">
+		select * from _order
+		<where>
+			<if test="Order.orderID!=null">orderID=#{Order.orderID}</if>
+			<if test="Order.orderNumber!=null"> AND orderNumber=#{Order.orderNumber}</if>
+			<if test="Order.userID!=null"> AND userID = #{Order.userID}</if>
+			<if test="Order.gatherOrderID!=null"> AND gatherOrderID = #{Order.gatherOrderID}</if>
+			<if test="Order.flag!=null" ><![CDATA[ AND flag&#{Order.flag} = #{Order.flag}]]></if>
+		</where>
+		<if test="page.orderBy!=null">
+			Order By #{page.orderBy}
+		</if>
+		limit #{page.startOption},#{page.optionOfPage}
+	</select>
+	
+	<!-- 返回分页总数 -->
+	<select id="getCount" resultType="int" parameterType="Order">
+		select count(orderID) from _order
+		<where>
+			<if test="orderID!=null">orderID=#{orderID}</if>
+			<if test="orderNumber!=null"> AND orderNumber=#{orderNumber}</if>
+			<if test="userID!=null"> AND userID = #{userID}</if>
+			<if test="gatherOrderID!=null"> AND gatherOrderID = #{gatherOrderID}</if>
+			<if test="flag!=null" ><![CDATA[  AND flag&#{flag} = #{flag}]]></if>
+		</where>
+	</select>
+	
+	<!-- 返回单个对象 -->
+	<select id="getObject" resultType="Order" parameterType="Order">
+		select * from _order
+		<where>
+			<if test="orderID!=null">orderID=#{orderID}</if>
+			<if test="orderNumber!=null"> AND orderNumber=#{orderNumber}</if>
+			<if test="flag!=null" ><![CDATA[ AND flag&#{flag} = #{flag}]]></if>
+		</where>
+	</select>
+	<select id="checkOrderNumber" parameterType="Order" resultType="Order">
+		SELECT MAX(orderNumber) as 'orderNumber' FROM _order WHERE orderNumber LIKE '${orderNumber}%'
+	</select>
+	<!-- 增加 -->
+	<insert id="add" parameterType="Order" useGeneratedKeys="true" keyProperty="orderID">
+		insert into _order(orderNumber,userID,order_price,goods_price,activity_price,coupon_price,
+		timePeriod,distributionTime,createDateTime,printDateTime,address,send_price,points,orderCouponInfo,
+		orderInfo,leaveMessage,print,cancel,del,comment,addPoint)
+		values(#{orderNumber},#{userID},#{order_price},#{goods_price},#{activity_price},#{coupon_price},
+		#{timePeriod},#{distributionTime},now(),#{printDateTime},#{address},#{send_price},#{points},#{orderCouponInfo},
+		#{orderInfo},#{leaveMessage},#{print},#{cancel},#{del},#{comment},#{addPoint})
+	</insert>
+	<select id="user_getOrder" parameterType="hashMap" resultMap="user_getOrder">
+		SELECT _order.*,orderGoods.`orderGoodsID`,orderGoods.`goodsIDs`,orderGoods.`goodsName`,orderGoods.`amount`,orderGoods.`product_price`,orderGoods.`comment` AS 'orderGoodsComment' FROM _order 
+		LEFT JOIN orderGoods
+		ON _order.`orderID` = orderGoods.`orderID`
+		where del = false
+		<if test="Order.userID!=null">AND _order.`userID`=#{Order.userID}</if>
+		<if test="Order.orderID!=null"> AND _order.orderID=#{Order.orderID}</if>
+		ORDER BY orderNumber DESC
+		LIMIT #{Page.startOption},#{Page.optionOfPage}
+	</select>
+	<select id="getOrderCount" parameterType="Order" resultType="int">
+		SELECT count(orderID) from _order
+		where del = false
+		<if test="userID!=null"> AND userID=#{userID}</if>
+	</select>
+	<select id="getsingleOrder" parameterType="Order" resultMap="user_getOrder">
+		SELECT _order.*,orderGoods.`orderGoodsID`,orderGoods.`goodsIDs`,orderGoods.`goodsName`,orderGoods.`amount`,orderGoods.`product_price`,orderGoods.`comment` AS 'orderGoodsComment' FROM _order 
+		LEFT JOIN orderGoods
+		ON _order.`orderID` = orderGoods.`orderID`
+		where del = false
+		<if test="userID!=null"> AND _order.`userID`=#{userID}</if>
+		<if test="orderID!=null"> AND _order.orderID=#{orderID}</if>
+	</select>
+	<delete id="delete" parameterType="Order">
+		delete from _order where orderID = #{orderID}
+	</delete>
+	
+	<!-- 改 -->
+	<update id="update" parameterType="Order">
+		update _order
+		<set>
+			<if test="del!=null">del=true,</if>
+			<if test="print!=null">print=true,</if>
+			<if test="cancel!=null">cancel=true,cancelDateTime=now(),</if>
+			<if test="comment!=null">comment=true,</if>
+		</set>
+		WHERE orderID = #{orderID}
+		<if test="userID!=null"> AND userID = #{userID}</if>
+	</update>
+	
+	<!-- admin -->
+	<select id="getAdminList" resultType="Order" parameterType="hashMap">
+		select * from _order
+		<where>
+			<if test="Order.orderID!=null"> AND orderID=#{Order.orderID}</if>
+			<if test="Order.orderNumber!=null"> AND orderNumber=#{Order.orderNumber}</if>
+			<if test="Order.userID!=null"> AND userID = #{Order.userID}</if>
+			<if test="Order.timePeriod!=null"> AND timePeriod = #{Order.timePeriod}</if>
+			<if test="Order.distributionTime!=null"><![CDATA[ AND distributionTime > #{Order.distributionTime}]]></if>
+			<if test="Order.createDateTime!=null"><![CDATA[ AND createDateTime > #{Order.createDateTime}]]></if>
+			<if test="Order.printDateTime!=null"><![CDATA[ AND printDateTime > #{Order.printDateTime}]]></if>
+			<if test="Order.address!=null"> AND address like '%${Order.address}%'</if>
+			<if test="Order.points!=null"> AND points like '%${Order.points}%'</if>
+			<if test="Order.orderCouponInfo!=null"> AND orderCouponInfo like '%${Order.orderCouponInfo}%'</if>
+			<if test="Order.leaveMessage!=null"> AND leaveMessage like '%${Order.leaveMessage}%'</if>
+			<if test="Order.print!=null"> AND print = #{Order.print}</if>
+			<if test="Order.cancel!=null"> AND cancel = #{Order.cancel}</if>
+			<if test="Order.del!=null"> AND del = #{Order.del}</if>
+			<if test="Order.comment!=null"> AND comment = #{Order.comment}</if>
+			<if test="Order.addPoint!=null"> AND addPoint = #{Order.addPoint}</if>
+		</where>
+		<if test="Page.orderBy!=null">
+			order by
+			<if test="Page.orderBy.equals('orderID')">
+				orderID
+			</if>
+			<if test="Page.orderBy.equals('orderNumber')">
+				orderNumber
+			</if>
+			<if test="Page.orderBy.equals('userID')">
+				userID
+			</if>
+			<if test="Page.orderBy.equals('order_price')">
+				order_price
+			</if>
+			<if test="Page.orderBy.equals('goods_price')">
+				goods_price
+			</if>
+			<if test="Page.orderBy.equals('activity_price')">
+				activity_price
+			</if>
+			<if test="Page.orderBy.equals('coupon_price')">
+				coupon_price
+			</if>
+			<if test="Page.orderBy.equals('timePeriod')">
+				timePeriod
+			</if>
+			<if test="Page.orderBy.equals('distributionTime')">
+				distributionTime
+			</if>
+			<if test="Page.orderBy.equals('createDateTime')">
+				createDateTime
+			</if>
+			<if test="Page.orderBy.equals('printDateTime')">
+				printDateTime
+			</if>
+			<if test="Page.orderBy.equals('cancel')">
+				cancel
+			</if>
+			<if test="Page.orderBy.equals('del')">
+				del
+			</if>
+			<if test="Page.orderBy.equals('comment')">
+				comment
+			</if>
+			<if test="Page.orderBy.equals('addPoint')">
+				addPoint
+			</if>
+			<if test="Page.orderBy.equals('print')">
+				print
+			</if>
+			<if test="Page.orderBy.equals('points')">
+				points
+			</if>
+			<if test="desc">
+			desc
+			</if>
+			,createDateTime desc
+		</if>
+		<if test="Page.orderBy==null">
+			ORDER BY createDateTime DESC
+		</if>
+		limit #{Page.startOption},#{Page.optionOfPage}
+	</select>
+	
+	<select id="getAdminCount" resultType="int" parameterType="hashMap">
+		select count(orderID) from _order
+		<where>
+			<if test="Order.orderID!=null"> AND orderID=#{Order.orderID}</if>
+			<if test="Order.orderNumber!=null"> AND orderNumber=#{Order.orderNumber}</if>
+			<if test="Order.userID!=null"> AND userID = #{Order.userID}</if>
+			<if test="Order.timePeriod!=null"> AND timePeriod = #{Order.timePeriod}</if>
+			<if test="Order.distributionTime!=null"><![CDATA[ AND distributionTime > #{Order.distributionTime}]]></if>
+			<if test="Order.createDateTime!=null"><![CDATA[ AND createDateTime > #{Order.createDateTime}]]></if>
+			<if test="Order.printDateTime!=null"><![CDATA[ AND printDateTime > #{Order.printDateTime}]]></if>
+			<if test="Order.address!=null"> AND address like '%${Order.address}%'</if>
+			<if test="Order.points!=null"> AND points like '%${Order.points}%'</if>
+			<if test="Order.orderCouponInfo!=null"> AND orderCouponInfo like '%${Order.orderCouponInfo}%'</if>
+			<if test="Order.leaveMessage!=null"> AND leaveMessage like '%${Order.leaveMessage}%'</if>
+			<if test="Order.print!=null"> AND print = #{Order.print}</if>
+			<if test="Order.cancel!=null"> AND cancel = #{Order.cancel}</if>
+			<if test="Order.del!=null"> AND del = #{Order.del}</if>
+			<if test="Order.comment!=null"> AND comment = #{Order.comment}</if>
+			<if test="Order.addPoint!=null"> AND addPoint = #{Order.addPoint}</if>
+		</where>
+	</select>
+	<!-- 订单监控 -->
+	<select id="orderMonitor" resultType="int" parameterType="Order">
+		select count(orderID) from _order
+		where print = false AND cancel = false AND del = false
+		<if test="printDateTime!=null"><![CDATA[ AND printDateTime <= now()]]></if>
+	</select>
+	<resultMap type="Order" id="printOrder">
+		<result property="orderID" column="orderID"/>
+		<result property="orderNumber" column="orderNumber"/>
+		<result property="goods_price" column="goods_price"/>
+		<result property="order_price" column="order_price"/>
+		<result property="timePeriod" column="timePeriod"/>
+		<result property="distributionTime" column="distributionTime"/>
+		<result property="address" column="address"/>
+		<result property="send_price" column="send_price"/>
+		<result property="points" column="points"/>
+		<result property="orderCouponInfo" column="orderCouponInfo"/>
+		<result property="orderInfo" column="orderInfo"/>
+		<result property="leaveMessage" column="leaveMessage"/>
+		<result property="activity_price" column="activity_price"/>
+		<result property="coupon_price" column="coupon_price"/>
+		<result property="print" column="print"/>
+		<result property="cancel" column="cancel"/>
+		<result property="del" column="del"/>
+		<result property="comment" column="comment"/>
+		<result property="addPoint" column="addPoint"/>
+		<collection property="orderGoodsList" column="orderID" ofType="OrderGoods">
+			<result column="orderGoodsID" property="orderGoodsID"/>
+			<result column="goodsIDs" property="goodsIDs"/>
+			<result column="goodsName" property="goodsName"/>
+			<result column="_amount" property="amount"/>
+			<result column="product_price" property="product_price"/>
+		</collection>
+	</resultMap>
+	<!-- 打印订单 -->
+	<select id="printOrder" resultMap="printOrder" parameterType="Order">
+		select _order.*,orderGoodsID,goodsIDs,goodsName,orderGoods.amount as '_amount',product_price from _order
+		left join orderGoods
+		on _order.orderID = orderGoods.orderID
+		where
+		<if test="orderIDs!=null"> #{orderIDs} like  concat('%-',_order.orderID,'-%') </if>
+		<if test="orderIDs==null">
+			_order.del = false AND _order.cancel = false AND _order.print = false
+			<if test="printDateTime!=null"><![CDATA[ AND _order.printDateTime <= now()]]></if>
+		</if>
+	</select>
+	<!-- 修改打印 -->
+	<update id="changePrint" parameterType="Order">
+		update _order set print = true
+		where #{orderIDs} like concat('%-',orderID,'-%') AND del = false AND cancel = false
+	</update>
+</mapper>

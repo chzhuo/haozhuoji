@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Cart">
+	<resultMap type="Cart" id="CartGoodsList" autoMapping="true">
+		<id column="cartID" property="cartID"/>
+		<result column="count" property="count"/>
+		<result column="flag" property="flag"/>
+		<collection property="goodsList" column="cartID" ofType="Goods" >
+			<id column="goodsID" property="goodsID"/>
+			<result column="goodsName" property="goodsName"/>
+			<result column="promotion_sentence" property="promotion_sentence"/>
+			<result column="amount" property="amount"/>
+			<result column="brand" property="brand"/>
+			<result column="sell" property="sell"/>
+			<result column="product_price" property="product_price"/>
+			<result column="specification" property="specification"/>
+		</collection>
+	</resultMap>
+
+    <!-- 分页返回集合 -->
+	<select id="getListPage" resultType="Cart" parameterType="hashMap">
+		select * from Cart
+		<where>
+			<if test="Cart.cartID!=null">CartID=#{Cart.cartID}</if>
+			<if test="Cart.userID!=null"> AND userID=#{Cart.userID}</if>
+			<if test="Cart.goodsID!=null"> AND goodsID = #{Cart.goodsID}</if>
+		</where>
+		<if test="page.orderBy!=null">
+			Order By #{page.orderBy}
+		</if>
+		limit #{page.startOption},#{page.optionOfPage}
+	</select>
+	
+	<!-- 返回分页总数 -->
+	<select id="getSumGoods" resultType="int" parameterType="Cart">
+		select sum(count) from Cart
+		<where>
+			<if test="cartID!=null">CartID=#{cartID}</if>
+			<if test="userID!=null"> AND userID=#{userID}</if>
+		</where>
+	</select>
+	
+	<!-- 返回单个对象 -->
+	<select id="getObject" resultType="Cart" parameterType="Cart">
+		select * from Cart
+		<where>
+			<if test="cartID!=null">CartID=#{cartID}</if>
+			<if test="userID!=null"> AND userID=#{userID}</if>
+			<if test="goodsID!=null"> AND goodsID = #{goodsID}</if>
+			<if test="bundlingID!=null"> AND bundlingID = #{bundlingID}</if>
+		</where>
+	</select>
+	
+	<update id="update" parameterType="Cart">
+		update cart
+		<set>
+			<if test="count!=null"> count=count+#{count},</if>
+			<if test="lastModify!=null">lastModify=#{lastModify},</if>
+		</set>
+		<where>
+			<if test="cartID!=null"> cartID=#{cartID}</if>
+			<if test="userID!=null"> AND userID=#{userID}</if>
+		</where>
+	</update>
+	
+	<!-- 增加 -->
+	<insert id="add" parameterType="Cart" useGeneratedKeys="true" keyProperty="cartID">
+		insert into Cart(userID,goodsID,bundlingID,count,createDateTime,lastModify)
+		values(#{userID},#{goodsID},#{bundlingID},#{count},#{createDateTime},#{lastModify})
+	</insert>
+	
+	<!-- 删除 -->
+	<delete id="delete" parameterType="Cart">
+		delete from Cart
+		<where>
+			<if test="cartID!=null"> cartID = #{cartID}</if>
+			<if test="goodsID!=null"> AND goodsID = #{goodsID}</if>
+			<if test="userID!=null"> AND userID = #{userID}</if>
+		</where>
+	</delete>
+	
+	<select id="getList" parameterType="Cart" resultType="Cart">
+		select * from Cart
+		<where>
+			<if test="cartID!=null">CartID=#{cartID}</if>
+			<if test="userID!=null"> AND userID=#{userID}</if>
+			<if test="goodsID!=null"> AND goodsID = #{goodsID}</if>
+			<if test="bundlingID!=null"> AND bundlingID = #{bundlingID}</if>
+		</where>
+	</select>
+
+	<select id="getCart" parameterType="Cart"  resultMap="CartGoodsList" >
+		SELECT cartID,goods.goodsID,cart.`flag`,bundling.bundlingID,goodsName,sell,brand,returnAmount(goods.`amount`,bundling.`amount`) AS 'amount' ,returnPrice(goods.`product_price`,bundling.`price`) AS 'price',promotion_sentence,COUNT,specification,
+		(CASE WHEN bundling.`bundlingID` IS NULL THEN goods.`points` ELSE bundling.`points` END ) AS 'points' 
+		FROM cart
+		LEFT JOIN bundling
+		ON bundling.`bundlingID` = cart.`bundlingID`
+		LEFT JOIN goods
+		ON cart.`goodsID` = goods.`goodsID` OR CONCAT('-',bundling.`goodsIDs`,'-') LIKE CONCAT('%-',goods.`goodsID`,'-%')
+		<where>
+			<if test="userID!=null"> cart.userID=#{userID}</if>
+			<if test="cartID!=null"> AND cart.cartID=#{cartID}</if>
+		</where>
+	</select>
+</mapper>
